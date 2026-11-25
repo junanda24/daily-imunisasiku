@@ -1,0 +1,1316 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="icon" href="data:," />
+    <title>IMUNISASIKU! — Jadwal Imunisasi Anak</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Varela+Round&family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,700;6..12,800&display=swap" rel="stylesheet" />
+    <style>
+      :root{
+        --pink:#EC4899; --pink-dark:#BE185D; --pink-soft:#FCE7F3; --pink-bg:#FDF2F8;
+        --blue:#0284C7; --blue-dark:#075985; --blue-soft:#E0F2FE;
+        --ink:#0F172A; --muted:#475569; --card:#FFFFFF; --line:#0F172A;
+        --green:#16A34A; --green-dark:#15803D; --green-soft:#DCFCE7;
+        --amber:#D97706; --amber-dark:#92400E; --amber-soft:#FEF3C7;
+        --red:#DC2626; --red-dark:#991B1B; --red-soft:#FEE2E2;
+        --gray:#64748B; --gray-dark:#334155; --gray-soft:#E2E8F0;
+        --shadow:0 10px 24px rgba(190,24,93,.14), 0 3px 8px rgba(15,23,42,.08);
+        --shadow-in:inset 0 -5px 0 rgba(15,23,42,.05), inset 0 3px 0 rgba(255,255,255,.65);
+        --radius:20px;
+      }
+      @media (prefers-color-scheme: dark){
+        :root{
+          --pink-bg:#221222; --card:#2E1B30; --ink:#F8FAFC; --muted:#CBD5E1; --line:#0B0710;
+          --pink-soft:#4A2140; --blue-soft:#123B52; --green-soft:#173D27; --amber-soft:#4A3410;
+          --red-soft:#4A1D1D; --gray-soft:#3B2A40;
+          --shadow:0 10px 24px rgba(0,0,0,.45), 0 3px 8px rgba(0,0,0,.35);
+          --shadow-in:inset 0 -5px 0 rgba(0,0,0,.25), inset 0 3px 0 rgba(255,255,255,.06);
+        }
+      }
+      *{ box-sizing:border-box; }
+      html{ -webkit-text-size-adjust:100%; }
+      body{
+        margin:0; background:var(--pink-bg); color:var(--ink);
+        font-family:"Nunito Sans", system-ui, sans-serif; font-size:16px; line-height:1.5;
+        padding-bottom:calc(92px + env(safe-area-inset-bottom));
+      }
+      h1,h2,h3,.font-display{ font-family:"Varela Round","Nunito Sans",sans-serif; font-weight:400; }
+      button, [role="button"], select, summary, input:not([type="checkbox"],[type="radio"]){ min-height:44px; }
+      button{ font-family:inherit; cursor:pointer; }
+      :focus-visible{ outline:3px solid var(--blue); outline-offset:2px; border-radius:8px; }
+      .wrap{ max-width:760px; margin:0 auto; padding:0 16px; }
+
+      /* ---------- Header ---------- */
+      header.app-head{
+        position:sticky; top:0; z-index:30; background:var(--pink-bg);
+        padding:14px 0 10px; border-bottom:3px solid var(--pink-soft);
+      }
+      .brand-row{ display:flex; align-items:center; gap:10px; }
+      .brand-badge{
+        width:46px; height:46px; flex:0 0 46px; border-radius:14px; background:var(--pink);
+        border:3px solid var(--line); box-shadow:0 4px 0 var(--line);
+        display:flex; align-items:center; justify-content:center; color:#fff;
+      }
+      .brand-badge svg{ width:26px; height:26px; }
+      .brand-name{ font-family:"Varela Round",sans-serif; font-size:24px; letter-spacing:.5px; line-height:1; }
+      .brand-name .bang{ color:var(--pink); }
+      .brand-sub{ font-size:13px; color:var(--muted); font-weight:700; }
+      .child-row{ display:flex; gap:8px; margin-top:12px; overflow-x:auto; padding-bottom:4px; scrollbar-width:none; }
+      .child-row::-webkit-scrollbar{ display:none; }
+      .chip-child{
+        display:inline-flex; align-items:center; gap:8px; white-space:nowrap;
+        background:var(--card); color:var(--ink); border:3px solid var(--line); border-radius:999px;
+        padding:6px 14px 6px 8px; font-weight:800; font-size:15px; box-shadow:0 3px 0 var(--line);
+      }
+      .chip-child .avatar{
+        width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+        font-family:"Varela Round",sans-serif; font-size:15px; color:#fff; border:2px solid var(--line);
+      }
+      .chip-child.active{ background:var(--pink); color:#fff; }
+      .chip-child.active .avatar{ background:#fff; color:var(--pink-dark); }
+      .chip-add{
+        display:inline-flex; align-items:center; gap:6px; white-space:nowrap;
+        background:var(--blue-soft); color:var(--blue-dark); border:3px dashed var(--blue);
+        border-radius:999px; padding:6px 14px; font-weight:800; font-size:15px; min-height:44px;
+      }
+      @media (prefers-color-scheme: dark){ .chip-add{ color:#7DD3FC; } }
+
+      /* ---------- Cards & clay ---------- */
+      .clay{
+        background:var(--card); border:3px solid var(--line); border-radius:var(--radius);
+        box-shadow:var(--shadow), var(--shadow-in);
+      }
+      .btn{
+        display:inline-flex; align-items:center; justify-content:center; gap:8px;
+        border:3px solid var(--line); border-radius:16px; padding:10px 18px;
+        font-weight:800; font-size:16px; background:var(--card); color:var(--ink);
+        box-shadow:0 4px 0 var(--line); transition:transform .08s ease, box-shadow .08s ease;
+        text-decoration:none;
+      }
+      .btn:active{ transform:translateY(3px); box-shadow:0 1px 0 var(--line); }
+      .btn-pink{ background:var(--pink); color:#fff; }
+      .btn-blue{ background:var(--blue); color:#fff; }
+      .btn-green{ background:var(--green); color:#fff; }
+      .btn-ghost{ box-shadow:none; border-color:var(--gray-soft); background:var(--card); }
+      .btn-danger{ background:var(--red-soft); color:var(--red-dark); border-color:var(--red-dark); box-shadow:0 4px 0 var(--red-dark); }
+      @media (prefers-color-scheme: dark){ .btn-danger{ color:#FCA5A5; } }
+      .btn-block{ width:100%; }
+      .btn-sm{ min-height:40px; padding:6px 14px; font-size:14px; border-radius:13px; }
+
+      /* ---------- Dashboard ---------- */
+      .section-title{ font-size:21px; margin:22px 0 10px; }
+      .next-card{ padding:18px; background:linear-gradient(160deg, var(--pink-soft), var(--card) 65%); }
+      .next-label{ font-weight:800; color:var(--pink-dark); font-size:14px; letter-spacing:.4px; text-transform:uppercase; }
+      @media (prefers-color-scheme: dark){ .next-label{ color:#F9A8D4; } }
+      .next-name{ font-family:"Varela Round",sans-serif; font-size:26px; line-height:1.15; margin:4px 0 2px; }
+      .next-due{ font-weight:700; color:var(--muted); }
+      .countdown{ display:inline-block; margin:10px 0 14px; padding:6px 14px; border-radius:999px; font-weight:800; border:3px solid var(--line); background:#fff; color:var(--ink); }
+      @media (prefers-color-scheme: dark){ .countdown{ background:var(--card); } }
+      .countdown.overdue{ background:var(--red); color:#fff; }
+      .countdown.soon{ background:var(--amber); color:#fff; }
+      .dash-grid{ display:grid; grid-template-columns:1fr; gap:14px; margin-top:14px; }
+      @media (min-width:640px){ .dash-grid{ grid-template-columns: 240px 1fr; } }
+      .ring-card{ padding:16px; display:flex; align-items:center; gap:16px; }
+      .ring-wrap{ position:relative; width:104px; height:104px; flex:0 0 104px; }
+      .ring-wrap svg{ transform:rotate(-90deg); }
+      .ring-bg{ stroke:var(--pink-soft); }
+      .ring-fg{ stroke:var(--pink); transition:stroke-dashoffset 1s cubic-bezier(.22,1,.36,1); }
+      .ring-center{ position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+      .ring-pct{ font-family:"Varela Round",sans-serif; font-size:24px; line-height:1; }
+      .ring-of{ font-size:12px; font-weight:800; color:var(--muted); }
+      .ring-title{ font-family:"Varela Round",sans-serif; font-size:18px; line-height:1.2; }
+      .ring-note{ color:var(--muted); font-weight:600; font-size:14px; margin-top:4px; }
+      .stats-card{ padding:16px; display:flex; flex-direction:column; justify-content:center; gap:10px; }
+      .stat-row{ display:flex; gap:8px; flex-wrap:wrap; }
+      .stat-chip{
+        display:inline-flex; align-items:center; gap:7px; padding:7px 13px; border-radius:999px;
+        border:3px solid var(--line); font-weight:800; font-size:14px; background:var(--card);
+      }
+      .dot{ width:12px; height:12px; border-radius:50%; border:2px solid var(--line); flex:0 0 12px; }
+      .dot.green{ background:var(--green); } .dot.amber{ background:var(--amber); }
+      .dot.red{ background:var(--red); } .dot.gray{ background:var(--gray); } .dot.pink{ background:var(--pink); }
+      .child-meta{ display:flex; align-items:center; gap:10px; padding:14px 16px; margin-top:14px; }
+      .child-meta .avatar-big{
+        width:52px; height:52px; border-radius:16px; display:flex; align-items:center; justify-content:center;
+        font-family:"Varela Round",sans-serif; font-size:24px; color:#fff; border:3px solid var(--line); flex:0 0 52px;
+      }
+      .child-meta .nm{ font-family:"Varela Round",sans-serif; font-size:19px; line-height:1.15; }
+      .child-meta .age{ color:var(--muted); font-weight:700; font-size:14px; }
+
+      /* ---------- Filter chips ---------- */
+      .filters{ display:flex; gap:8px; margin:14px 0 4px; flex-wrap:wrap; }
+      .fchip{
+        border:3px solid var(--line); background:var(--card); color:var(--ink); border-radius:999px;
+        padding:6px 16px; font-weight:800; font-size:15px; min-height:44px; box-shadow:0 3px 0 var(--line);
+      }
+      .fchip.active{ background:var(--blue); color:#fff; }
+      .fchip .cnt{ opacity:.75; font-size:13px; }
+
+      /* ---------- Timeline ---------- */
+      .group-title{ display:flex; align-items:center; gap:10px; margin:22px 0 10px; }
+      .group-title .g-badge{
+        background:var(--blue); color:#fff; border:3px solid var(--line); border-radius:12px;
+        padding:3px 12px; font-family:"Varela Round",sans-serif; font-size:16px; box-shadow:0 3px 0 var(--line);
+      }
+      .group-title .g-line{ flex:1; border-top:3px dashed var(--pink); opacity:.55; }
+      .vax-list{ display:flex; flex-direction:column; gap:10px; }
+      .vax-card{
+        width:100%; text-align:left; padding:13px 15px; display:flex; gap:12px; align-items:flex-start;
+        background:var(--card); color:var(--ink);
+      }
+      .vax-ico{
+        width:44px; height:44px; flex:0 0 44px; border-radius:13px; border:3px solid var(--line);
+        display:flex; align-items:center; justify-content:center; color:#fff;
+      }
+      .vax-ico svg{ width:23px; height:23px; }
+      .vax-main{ flex:1; min-width:0; }
+      .vax-name{ font-weight:800; font-size:16.5px; line-height:1.25; }
+      .vax-sub{ color:var(--muted); font-weight:600; font-size:13.5px; margin-top:1px; }
+      .vax-tags{ display:flex; gap:6px; flex-wrap:wrap; margin-top:7px; }
+      .tag{
+        font-size:12px; font-weight:800; padding:2px 9px; border-radius:999px; border:2px solid var(--line);
+      }
+      .tag.program{ background:var(--blue-soft); color:var(--blue-dark); }
+      .tag.bias{ background:var(--pink-soft); color:var(--pink-dark); }
+      .tag.endemis{ background:var(--amber-soft); color:var(--amber-dark); }
+      .tag.female{ background:var(--pink-soft); color:var(--pink-dark); }
+      @media (prefers-color-scheme: dark){
+        .tag.program{ color:#7DD3FC; } .tag.bias,.tag.female{ color:#F9A8D4; } .tag.endemis{ color:#FCD34D; }
+      }
+      .status-pill{
+        flex:0 0 auto; display:inline-flex; align-items:center; gap:6px; font-weight:800; font-size:13px;
+        padding:5px 11px; border-radius:999px; border:3px solid var(--line);
+      }
+      .status-pill.done{ background:var(--green); color:#fff; }
+      .status-pill.soon{ background:var(--amber); color:#fff; }
+      .status-pill.overdue{ background:var(--red); color:#fff; }
+      .status-pill.upcoming{ background:var(--gray-soft); color:var(--gray-dark); }
+      @media (prefers-color-scheme: dark){ .status-pill.upcoming{ color:#E2E8F0; } }
+      .flu-card{ padding:16px; border-color:var(--blue); background:linear-gradient(160deg, var(--blue-soft), var(--card) 70%); }
+      .empty-box{ padding:26px 18px; text-align:center; color:var(--muted); font-weight:700; }
+
+      /* ---------- Library ---------- */
+      .search-box{ position:relative; margin:16px 0 12px; }
+      .search-box svg{ position:absolute; left:14px; top:50%; transform:translateY(-50%); width:20px; height:20px; color:var(--muted); }
+      .search-box input{
+        width:100%; padding:12px 14px 12px 44px; border:3px solid var(--line); border-radius:16px;
+        font:inherit; font-weight:600; background:var(--card); color:var(--ink); box-shadow:var(--shadow-in);
+      }
+      .lib-card{ padding:15px 16px; }
+      .lib-name{ font-family:"Varela Round",sans-serif; font-size:18px; }
+      .lib-prevent{ font-weight:600; margin-top:2px; }
+      .lib-age{ color:var(--muted); font-weight:700; font-size:14px; margin-top:5px; display:flex; gap:7px; align-items:flex-start; }
+      .lib-age svg{ width:17px; height:17px; flex:0 0 17px; margin-top:2px; }
+
+      /* ---------- Kartu tab ---------- */
+      .kartu-head{ padding:18px; }
+      .kartu-table{ width:100%; border-collapse:collapse; font-size:14.5px; }
+      .kartu-table th,.kartu-table td{ text-align:left; padding:9px 10px; border-bottom:2px solid var(--pink-soft); vertical-align:top; }
+      .kartu-table th{ font-family:"Varela Round",sans-serif; font-weight:400; }
+      .done-txt{ color:var(--green-dark); font-weight:800; }
+      .notyet-txt{ color:var(--muted); font-weight:700; }
+      @media (prefers-color-scheme: dark){ .done-txt{ color:#4ADE80; } }
+      .action-grid{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:14px; }
+      @media (max-width:420px){ .action-grid{ grid-template-columns:1fr; } }
+
+      /* ---------- Onboarding ---------- */
+      .onboard{ padding:30px 22px; text-align:center; margin-top:22px; }
+      .onboard .big-ico{
+        width:92px; height:92px; margin:0 auto 16px; border-radius:26px; background:var(--pink);
+        border:4px solid var(--line); box-shadow:0 6px 0 var(--line);
+        display:flex; align-items:center; justify-content:center; color:#fff;
+      }
+      .onboard .big-ico svg{ width:50px; height:50px; }
+      .onboard h1{ font-size:27px; margin:0 0 8px; line-height:1.2; }
+      .onboard p{ color:var(--muted); font-weight:600; margin:0 auto 6px; max-width:430px; }
+
+      /* ---------- Forms ---------- */
+      .field{ margin-bottom:14px; text-align:left; }
+      .field label{ display:block; font-weight:800; margin-bottom:6px; font-size:15px; }
+      .field input[type="text"], .field input[type="date"], .field select, .field textarea{
+        width:100%; padding:11px 13px; border:3px solid var(--line); border-radius:14px;
+        font:inherit; font-weight:600; background:var(--card); color:var(--ink);
+      }
+      .field .err{ color:var(--red-dark); font-weight:800; font-size:14px; margin-top:5px; display:none; }
+      @media (prefers-color-scheme: dark){ .field .err{ color:#FCA5A5; } }
+      .field.invalid input, .field.invalid select{ border-color:var(--red); }
+      .field.invalid .err{ display:block; }
+      .gender-row{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+      .gender-opt{ position:relative; display:block; cursor:pointer; }
+      .gender-opt input{
+        appearance:none; -webkit-appearance:none; position:absolute; left:14px; top:50%; transform:translateY(-50%);
+        width:22px; height:22px; min-height:22px; border-radius:50%; border:3px solid var(--line);
+        background:#fff; margin:0; cursor:pointer; z-index:2; padding:0;
+      }
+      .gender-opt input:checked{ background:var(--pink-dark); box-shadow:inset 0 0 0 4px #fff; }
+      .gender-opt .g-face{
+        display:flex; align-items:center; justify-content:center; gap:8px; min-height:52px; padding-left:26px;
+        border:3px solid var(--line); border-radius:14px; font-weight:800; background:var(--card);
+      }
+      .gender-opt input:checked + .g-face{ background:var(--pink); color:#fff; box-shadow:0 4px 0 var(--line); }
+      .gender-opt input:focus-visible + .g-face{ outline:3px solid var(--blue); outline-offset:2px; }
+      .hint{ font-size:13.5px; color:var(--muted); font-weight:600; }
+
+      /* ---------- Sheet & modal ---------- */
+      .overlay{
+        position:fixed; inset:0; background:rgba(15,23,42,.5); z-index:60;
+        display:none; align-items:flex-end; justify-content:center;
+      }
+      .overlay.open{ display:flex; }
+      .sheet{
+        background:var(--card); color:var(--ink); width:100%; max-width:560px; max-height:92vh; overflow-y:auto;
+        border:4px solid var(--line); border-bottom:none; border-radius:26px 26px 0 0; padding:20px 20px calc(20px + env(safe-area-inset-bottom));
+        animation:slideUp .28s cubic-bezier(.22,1,.36,1);
+      }
+      @media (min-width:640px){ .overlay{ align-items:center; padding:20px; } .sheet{ border-bottom:4px solid var(--line); border-radius:26px; } }
+      @keyframes slideUp{ from{ transform:translateY(36px); opacity:.4; } to{ transform:translateY(0); opacity:1; } }
+      .sheet h2{ font-size:22px; margin:0 34px 4px 0; line-height:1.2; }
+      .sheet-close{
+        position:absolute; top:14px; right:14px; width:44px; height:44px; border-radius:50%;
+        border:3px solid var(--line); background:var(--pink-soft); color:var(--ink);
+        display:flex; align-items:center; justify-content:center;
+      }
+      .sheet-wrap{ position:relative; }
+      .detail-row{ display:flex; gap:9px; align-items:flex-start; margin-top:10px; font-weight:600; }
+      .detail-row svg{ width:19px; height:19px; flex:0 0 19px; margin-top:2px; color:var(--blue); }
+      .given-box{ background:var(--green-soft); border:3px solid var(--green-dark); border-radius:16px; padding:13px 15px; margin-top:14px; }
+      .modal-card{
+        background:var(--card); color:var(--ink); width:calc(100% - 32px); max-width:420px;
+        border:4px solid var(--line); border-radius:24px; padding:22px; animation:slideUp .25s ease;
+        box-shadow:var(--shadow);
+      }
+      .modal-card h2{ font-size:20px; margin:0 0 8px; }
+      .modal-card p{ color:var(--muted); font-weight:600; margin:0 0 18px; }
+      .modal-actions{ display:flex; gap:10px; }
+      .modal-actions .btn{ flex:1; }
+      .overlay.center{ align-items:center; }
+
+      /* ---------- Toast & confetti ---------- */
+      #toast{
+        position:fixed; left:50%; transform:translate(-50%, 140%); bottom:calc(104px + env(safe-area-inset-bottom));
+        z-index:90; background:var(--ink); color:var(--pink-bg); font-weight:800; font-size:15px;
+        padding:13px 20px; border-radius:16px; border:3px solid var(--line); max-width:calc(100% - 32px);
+        text-align:center; transition:transform .35s cubic-bezier(.22,1,.36,1), opacity .3s ease, visibility .3s;
+        opacity:0; visibility:hidden; pointer-events:none;
+      }
+      @media (prefers-color-scheme: dark){ #toast{ background:#F8FAFC; color:#0F172A; } }
+      #toast.show{ transform:translate(-50%, 0); opacity:1; visibility:visible; }
+      #confetti{ position:fixed; inset:0; pointer-events:none; z-index:95; overflow:hidden; }
+      .confetto{ position:absolute; top:-16px; border-radius:3px; animation:fall linear forwards; }
+      @keyframes fall{ to{ transform:translateY(105vh) rotate(720deg); opacity:.85; } }
+
+      /* ---------- Bottom nav ---------- */
+      nav.bottom-nav{
+        position:fixed; left:0; right:0; bottom:0; z-index:50;
+        background:var(--card); border-top:4px solid var(--line);
+        padding:8px 10px calc(8px + env(safe-area-inset-bottom));
+      }
+      .nav-inner{ max-width:560px; margin:0 auto; display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; }
+      .nav-btn{
+        display:flex; flex-direction:column; align-items:center; gap:2px; padding:7px 4px;
+        border:3px solid transparent; border-radius:16px; background:transparent; color:var(--muted);
+        font-weight:800; font-size:13px; min-height:56px;
+      }
+      .nav-btn svg{ width:24px; height:24px; }
+      .nav-btn.active{ background:var(--pink-soft); color:var(--pink-dark); border-color:var(--line); box-shadow:0 3px 0 var(--line); }
+      @media (prefers-color-scheme: dark){ .nav-btn.active{ color:#F9A8D4; } }
+
+      footer.disclaimer{ margin:30px 0 6px; padding:16px; text-align:center; }
+      footer.disclaimer p{ margin:0; color:var(--muted); font-weight:700; font-size:14px; }
+      footer.disclaimer .foot-brand{ font-family:"Varela Round",sans-serif; color:var(--ink); font-size:15px; margin-bottom:4px; }
+
+      .hidden{ display:none !important; }
+      #printArea{ display:none; }
+
+      @media print{
+        body{ padding-bottom:0; background:#fff; }
+        #app, nav.bottom-nav, #toast, #confetti, .overlay{ display:none !important; }
+        #printArea{ display:block !important; color:#0F172A; font-family:"Nunito Sans",sans-serif; }
+        #printArea h1{ font-family:"Varela Round",sans-serif; font-size:22px; margin:0 0 2px; }
+        #printArea h2{ font-family:"Varela Round",sans-serif; font-size:16px; margin:16px 0 6px; }
+        #printArea table{ width:100%; border-collapse:collapse; font-size:12.5px; }
+        #printArea th, #printArea td{ border:1px solid #94A3B8; padding:5px 7px; text-align:left; }
+        #printArea .meta{ font-size:13px; margin-bottom:10px; }
+        #printArea .foot{ font-size:11px; color:#475569; margin-top:14px; }
+      }
+
+      @media (prefers-reduced-motion: reduce){
+        *, *::before, *::after{ animation-duration:.001s !important; transition-duration:.001s !important; }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app">
+      <header class="app-head">
+        <div class="wrap">
+          <div class="brand-row">
+            <div class="brand-badge" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m18 2 4 4"/><path d="m17 7 3-3"/><path d="M19 9 8.7 19.3c-1 1-2.5 1-3.4 0l-.6-.6c-1-1-1-2.5 0-3.4L15 5"/><path d="m9 11 4 4"/><path d="m5 19-3 3"/><path d="m14 4 6-6"/></svg>
+            </div>
+            <div>
+              <div class="brand-name">IMUNISASI<span class="bang">KU!</span></div>
+              <div class="brand-sub">Jadwal imunisasi anak · Rekomendasi IDAI 2024</div>
+            </div>
+          </div>
+          <div class="child-row" id="childRow" role="tablist" aria-label="Pilih anak"></div>
+        </div>
+      </header>
+
+      <main class="wrap" id="mainEl">
+        <!-- Onboarding -->
+        <section id="viewOnboard" class="hidden">
+          <div class="clay onboard">
+            <div class="big-ico" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/><path d="M3.22 12H9.5l.5-1 2 4.5 2-7 1.5 3.5h6.27"/></svg>
+            </div>
+            <h1>Selamat datang di IMUNISASIKU!</h1>
+            <p>Teman pengingat imunisasi si kecil, dari lahir sampai usia 18 tahun. Masukkan tanggal lahir anak, dan seluruh jadwal imunisasi sesuai rekomendasi IDAI 2024 akan tersusun otomatis — lengkap dengan pengingat vaksin berikutnya dan catatan pemberiannya.</p>
+            <p class="hint">Semua data tersimpan aman di perangkat ini saja. Tanpa akun, tanpa login.</p>
+          </div>
+          <div class="clay" style="padding:20px; margin-top:16px;">
+            <h2 style="font-size:20px; margin:0 0 14px;">Tambah anak pertama</h2>
+            <form id="onboardForm" novalidate></form>
+          </div>
+        </section>
+
+        <!-- Tab Jadwal -->
+        <section id="viewJadwal" class="hidden">
+          <div id="dashArea"></div>
+          <h2 class="section-title">Linimasa Jadwal</h2>
+          <div class="filters" id="filterRow" role="group" aria-label="Filter jadwal"></div>
+          <div id="fluArea"></div>
+          <div id="timelineArea"></div>
+        </section>
+
+        <!-- Tab Perpustakaan -->
+        <section id="viewLibrary" class="hidden">
+          <h2 class="section-title" style="margin-top:18px;">Perpustakaan Vaksin</h2>
+          <p style="color:var(--muted); font-weight:600; margin:0;">Kenali setiap vaksin dalam jadwal IDAI 2024: penyakit yang dicegah dan usia pemberiannya.</p>
+          <div class="search-box">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+            <input type="search" id="libSearch" placeholder="Cari vaksin atau penyakit…" aria-label="Cari vaksin" />
+          </div>
+          <div class="vax-list" id="libList"></div>
+        </section>
+
+        <!-- Tab Kartu -->
+        <section id="viewKartu" class="hidden">
+          <h2 class="section-title" style="margin-top:18px;">Kartu Imunisasi</h2>
+          <div id="kartuArea"></div>
+          <div class="clay" style="padding:18px; margin-top:16px;">
+            <h3 style="font-size:18px; margin:0 0 6px;">Cadangan Data</h3>
+            <p class="hint" style="margin:0 0 12px;">Ekspor data sebagai berkas JSON untuk disimpan, atau impor berkas cadangan untuk memulihkan data di perangkat ini.</p>
+            <div class="action-grid" style="margin-top:0;">
+              <button class="btn btn-blue" id="btnExport" type="button">Ekspor JSON</button>
+              <button class="btn" id="btnImport" type="button">Impor JSON</button>
+            </div>
+            <input type="file" id="importFile" accept="application/json,.json" class="hidden" />
+          </div>
+          <div class="clay" style="padding:18px; margin-top:16px;">
+            <h3 style="font-size:18px; margin:0 0 6px;">Zona Berbahaya</h3>
+            <p class="hint" style="margin:0 0 12px;">Menghapus profil anak atau seluruh data tidak dapat dibatalkan. Pertimbangkan ekspor JSON terlebih dahulu.</p>
+            <div class="action-grid" style="margin-top:0;">
+              <button class="btn btn-danger" id="btnDeleteChild" type="button">Hapus Profil Anak Ini</button>
+              <button class="btn btn-danger" id="btnDeleteAll" type="button">Hapus Semua Data</button>
+            </div>
+          </div>
+        </section>
+
+        <footer class="disclaimer clay">
+          <p class="foot-brand">IMUNISASIKU! — Jadwal Imunisasi Anak</p>
+          <p>Jadwal mengikuti rekomendasi IDAI 2024 sebagai panduan umum. Keputusan akhir tetap mengikuti dokter anak / petugas kesehatan.</p>
+        </footer>
+      </main>
+    </div>
+
+    <!-- Bottom sheet -->
+    <div class="overlay" id="sheetOverlay">
+      <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+        <div class="sheet-wrap">
+          <button class="sheet-close" id="sheetClose" type="button" aria-label="Tutup">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+          </button>
+          <div id="sheetContent"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal konfirmasi -->
+    <div class="overlay center" id="modalOverlay">
+      <div class="modal-card" role="alertdialog" aria-modal="true" aria-labelledby="modalTitle" aria-describedby="modalDesc">
+        <h2 id="modalTitle">Konfirmasi</h2>
+        <p id="modalDesc"></p>
+        <div class="modal-actions">
+          <button class="btn btn-ghost" id="modalCancel" type="button">Batal</button>
+          <button class="btn btn-pink" id="modalOk" type="button">Ya, Lanjutkan</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="toast" role="status" aria-live="polite"></div>
+    <div id="confetti" aria-hidden="true"></div>
+    <div id="printArea"></div>
+
+    <nav class="bottom-nav" aria-label="Navigasi utama">
+      <div class="nav-inner">
+        <button class="nav-btn active" data-tab="jadwal" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/></svg>
+          Jadwal
+        </button>
+        <button class="nav-btn" data-tab="library" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+          Perpustakaan
+        </button>
+        <button class="nav-btn" data-tab="kartu" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M7 15h4"/></svg>
+          Kartu
+        </button>
+      </div>
+    </nav>
+
+    <script>
+    'use strict';
+    /* ================= DATA JADWAL IDAI 2024 (offset = hari dari tanggal lahir) ================= */
+    var SCHEDULE = [
+      { id:'hb0',    name:'Hepatitis B', dose:'Dosis 0', offset:0, group:'Lahir', program:true,
+        prevents:'Hepatitis B', note:'Diberikan sebelum 24 jam setelah lahir, setelah pemberian vitamin K1.' },
+      { id:'polio0', name:'Polio Oral 0 (bOPV-0)', dose:'Dosis 0', offset:0, group:'Lahir', program:true,
+        prevents:'Polio', note:'Diberikan saat lahir atau sebelum pulang dari tempat bersalin.' },
+      { id:'bcg',    name:'BCG', dose:'Dosis tunggal', offset:30, group:'1 bulan', program:true,
+        prevents:'Tuberkulosis (TB) berat', note:'Diberikan segera mungkin, sebelum usia 1 bulan.' },
+      { id:'dtp1',   name:'DTP-HB-Hib', dose:'Dosis 1', offset:60, group:'2 bulan', program:true,
+        prevents:'Difteri, tetanus, pertusis, hepatitis B, dan infeksi Hib' },
+      { id:'polio1', name:'Polio 1 (bOPV)', dose:'Dosis 1', offset:60, group:'2 bulan', program:true,
+        prevents:'Polio' },
+      { id:'pcv1',   name:'PCV', dose:'Dosis 1', offset:60, group:'2 bulan', program:true,
+        prevents:'Pneumonia dan meningitis akibat bakteri pneumokokus' },
+      { id:'rota1',  name:'Rotavirus', dose:'Dosis 1', offset:60, group:'2 bulan', program:false,
+        prevents:'Diare berat akibat rotavirus', note:'Diberikan secara oral (diteteskan ke mulut), bukan suntikan.' },
+      { id:'dtp2',   name:'DTP-HB-Hib', dose:'Dosis 2', offset:90, group:'3 bulan', program:true,
+        prevents:'Difteri, tetanus, pertusis, hepatitis B, dan infeksi Hib' },
+      { id:'polio2', name:'Polio 2 (bOPV)', dose:'Dosis 2', offset:90, group:'3 bulan', program:true,
+        prevents:'Polio' },
+      { id:'dtp3',   name:'DTP-HB-Hib', dose:'Dosis 3', offset:120, group:'4 bulan', program:true,
+        prevents:'Difteri, tetanus, pertusis, hepatitis B, dan infeksi Hib' },
+      { id:'polio3', name:'Polio 3 (bOPV)', dose:'Dosis 3', offset:120, group:'4 bulan', program:true,
+        prevents:'Polio' },
+      { id:'ipv1',   name:'IPV (Polio Suntik)', dose:'Dosis 1', offset:120, group:'4 bulan', program:true,
+        prevents:'Polio', note:'Polio dalam bentuk suntikan (inactivated polio vaccine).' },
+      { id:'pcv2',   name:'PCV', dose:'Dosis 2', offset:120, group:'4 bulan', program:true,
+        prevents:'Pneumonia dan meningitis akibat bakteri pneumokokus' },
+      { id:'rota2',  name:'Rotavirus', dose:'Dosis 2', offset:120, group:'4 bulan', program:false,
+        prevents:'Diare berat akibat rotavirus', note:'Diberikan secara oral (diteteskan ke mulut), bukan suntikan.' },
+      { id:'pcv3',   name:'PCV', dose:'Dosis 3', offset:180, group:'6 bulan', program:false,
+        prevents:'Pneumonia dan meningitis akibat bakteri pneumokokus' },
+      { id:'rota3',  name:'Rotavirus', dose:'Dosis 3', offset:180, group:'6 bulan', program:false,
+        prevents:'Diare berat akibat rotavirus', note:'Diberikan secara oral (diteteskan ke mulut), bukan suntikan.' },
+      { id:'flu2',   name:'Influenza', dose:'Dosis 2', offset:210, group:'7 bulan', program:false,
+        prevents:'Influenza (flu musiman)', note:'Dosis ke-2 pada tahun pertama, untuk anak di bawah 9 tahun yang baru pertama kali menerima vaksin influenza.' },
+      { id:'mr1',    name:'MR', dose:'Dosis 1', offset:270, group:'9 bulan', program:true,
+        prevents:'Campak dan rubella' },
+      { id:'ipv2',   name:'IPV (Polio Suntik)', dose:'Dosis 2', offset:270, group:'9 bulan', program:true,
+        prevents:'Polio', note:'Polio dalam bentuk suntikan (inactivated polio vaccine).' },
+      { id:'je1',    name:'JE (Japanese Encephalitis)', dose:'Dosis 1', offset:270, group:'9 bulan', program:false, endemis:true,
+        prevents:'Japanese Encephalitis (radang otak)', note:'Khusus untuk anak yang tinggal di daerah endemis (misalnya Bali) atau yang bepergian lama ke daerah endemis.' },
+      { id:'pcvb',   name:'PCV', dose:'Booster', offset:365, group:'12 bulan', program:true,
+        prevents:'Pneumonia dan meningitis akibat bakteri pneumokokus' },
+      { id:'hepa1',  name:'Hepatitis A', dose:'Dosis 1', offset:365, group:'12 bulan', program:false,
+        prevents:'Hepatitis A', note:'Diberikan 2 dosis dengan jarak 6–18 bulan.' },
+      { id:'var1',   name:'Varisela', dose:'Dosis 1', offset:365, group:'12 bulan', program:false,
+        prevents:'Cacar air (varisela)', note:'Diberikan 2 dosis.' },
+      { id:'var2',   name:'Varisela', dose:'Dosis 2', offset:425, group:'14 bulan', program:false,
+        prevents:'Cacar air (varisela)' },
+      { id:'mr2',    name:'MR/MMR', dose:'Dosis 2', offset:450, group:'15 bulan', program:true,
+        prevents:'Campak dan rubella (MMR juga melindungi dari gondongan)' },
+      { id:'dtpb',   name:'DTP-HB-Hib', dose:'Booster', offset:540, group:'18 bulan', program:true,
+        prevents:'Difteri, tetanus, pertusis, hepatitis B, dan infeksi Hib' },
+      { id:'polio4', name:'Polio (bOPV)', dose:'Dosis 4', offset:540, group:'18 bulan', program:true,
+        prevents:'Polio' },
+      { id:'hepa2',  name:'Hepatitis A', dose:'Dosis 2', offset:540, group:'18 bulan', program:false,
+        prevents:'Hepatitis A' },
+      { id:'jeb',    name:'JE (Japanese Encephalitis)', dose:'Booster', offset:730, group:'2 tahun', program:false, endemis:true,
+        prevents:'Japanese Encephalitis (radang otak)', note:'Diberikan 1–2 tahun setelah dosis 1.' },
+      { id:'tif1',   name:'Tifoid', dose:'Dosis 1', offset:730, group:'2 tahun', program:false,
+        prevents:'Demam tifoid', note:'Diulang setiap 3 tahun.' },
+      { id:'dt5',    name:'DT/DTPa', dose:'Booster', offset:1825, group:'5 tahun', program:true, bias:true,
+        prevents:'Difteri dan tetanus', note:'Diberikan melalui program BIAS di SD kelas 1.' },
+      { id:'mr3',    name:'MR/MMR', dose:'Dosis 3', offset:1825, group:'5 tahun', program:true, bias:true,
+        prevents:'Campak dan rubella (MMR juga melindungi dari gondongan)', note:'Diberikan melalui program BIAS di SD kelas 1.' },
+      { id:'den1',   name:'Dengue (TAK-003)', dose:'Dosis 1', offset:2190, group:'6 tahun', program:false,
+        prevents:'Demam berdarah dengue', note:'Diberikan 2 dosis dengan jarak 3 bulan, tanpa perlu tes serologi sebelumnya.' },
+      { id:'den2',   name:'Dengue (TAK-003)', dose:'Dosis 2', offset:2280, group:'6 tahun 3 bulan', program:false,
+        prevents:'Demam berdarah dengue' },
+      { id:'tif2',   name:'Tifoid', dose:'Dosis 2', offset:2920, group:'8 tahun', program:false,
+        prevents:'Demam tifoid', note:'Ulangan 3 tahunan dari dosis sebelumnya.' },
+      { id:'hpv1',   name:'HPV', dose:'Dosis 1', offset:3285, group:'9 tahun', program:false, bias:true, femaleOnly:true,
+        prevents:'Kanker serviks dan penyakit lain akibat infeksi HPV', note:'Khusus anak perempuan. Program BIAS kelas V–VI, diberikan 2 dosis dengan jarak 6–12 bulan.' },
+      { id:'hpv2',   name:'HPV', dose:'Dosis 2', offset:3470, group:'9,5 tahun', program:false, bias:true, femaleOnly:true,
+        prevents:'Kanker serviks dan penyakit lain akibat infeksi HPV', note:'Khusus anak perempuan.' },
+      { id:'td',     name:'Td/Tdap', dose:'Booster', offset:3650, group:'10 tahun', program:true, bias:true,
+        prevents:'Tetanus dan difteri (Tdap juga melindungi dari pertusis)', note:'Diberikan melalui program BIAS SD kelas 2 dan 5. Booster Td diulang setiap 10 tahun.' },
+      { id:'tif3',   name:'Tifoid', dose:'Dosis 3', offset:4015, group:'11 tahun', program:false,
+        prevents:'Demam tifoid', note:'Ulangan 3 tahunan dari dosis sebelumnya.' },
+      { id:'tif4',   name:'Tifoid', dose:'Dosis 4', offset:5110, group:'14 tahun', program:false,
+        prevents:'Demam tifoid', note:'Ulangan 3 tahunan dari dosis sebelumnya.' },
+      { id:'tif5',   name:'Tifoid', dose:'Dosis 5', offset:6205, group:'17 tahun', program:false,
+        prevents:'Demam tifoid', note:'Ulangan 3 tahunan dari dosis sebelumnya.' }
+    ];
+    var GROUP_ORDER = ['Lahir','1 bulan','2 bulan','3 bulan','4 bulan','6 bulan','7 bulan','9 bulan','12 bulan','14 bulan','15 bulan','18 bulan','2 tahun','5 tahun','6 tahun','6 tahun 3 bulan','8 tahun','9 tahun','9,5 tahun','10 tahun','11 tahun','14 tahun','17 tahun'];
+
+    var LIBRARY = [
+      { name:'Hepatitis B', prevents:'Hepatitis B — infeksi hati akibat virus hepatitis B.', ages:'Lahir (dosis 0), lalu 2, 3, 4 bulan (dalam vaksin DTP-HB-Hib) dan booster 18 bulan.' },
+      { name:'BCG', prevents:'Tuberkulosis (TB) berat pada anak, seperti TB milier dan meningitis TB.', ages:'Sekali, segera setelah lahir dan sebelum usia 1 bulan.' },
+      { name:'Polio', prevents:'Polio (poliomielitis) — kelumpuhan akibat virus polio.', ages:'Tetes (bOPV): lahir, 2, 3, 4, dan 18 bulan. Suntik (IPV): 4 dan 9 bulan.' },
+      { name:'DTP', prevents:'Difteri, tetanus, dan pertusis (batuk rejan).', ages:'2, 3, 4 bulan, booster 18 bulan, lalu DT/DTPa usia 5 tahun dan Td/Tdap usia 10 tahun.' },
+      { name:'Hib', prevents:'Infeksi Haemophilus influenzae tipe b — penyebab meningitis dan pneumonia pada balita.', ages:'2, 3, 4 bulan dan booster 18 bulan (dalam vaksin kombinasi DTP-HB-Hib).' },
+      { name:'PCV', prevents:'Pneumonia dan meningitis akibat bakteri pneumokokus (Streptococcus pneumoniae).', ages:'2, 4, 6 bulan dan booster 12 bulan.' },
+      { name:'Rotavirus', prevents:'Diare berat akibat rotavirus yang dapat menyebabkan dehidrasi.', ages:'2, 4, dan 6 bulan, diberikan secara oral (tetes).' },
+      { name:'Influenza', prevents:'Influenza (flu musiman) dan komplikasinya.', ages:'Mulai usia 6 bulan, diulang setiap tahun. Tahun pertama untuk anak di bawah 9 tahun diberikan 2 dosis.' },
+      { name:'MR/MMR', prevents:'Campak dan rubella; MMR juga melindungi dari gondongan (mumps).', ages:'9 bulan, 15 bulan, dan 5 tahun (melalui BIAS SD kelas 1).' },
+      { name:'JE', prevents:'Japanese Encephalitis — radang otak yang ditularkan nyamuk.', ages:'9 bulan dan booster usia 2 tahun, khusus daerah endemis (misalnya Bali) atau perjalanan lama ke daerah endemis.' },
+      { name:'Hepatitis A', prevents:'Hepatitis A — infeksi hati akibat virus hepatitis A.', ages:'12 bulan dan 18 bulan (2 dosis, jarak 6–18 bulan).' },
+      { name:'Varisela', prevents:'Cacar air (varisela).', ages:'12 bulan dan 14 bulan (2 dosis).' },
+      { name:'Tifoid', prevents:'Demam tifoid akibat bakteri Salmonella typhi.', ages:'Mulai usia 2 tahun, diulang setiap 3 tahun.' },
+      { name:'Dengue', prevents:'Demam berdarah dengue.', ages:'Usia 6 tahun, 2 dosis (TAK-003) dengan jarak 3 bulan, tanpa tes serologi.' },
+      { name:'HPV', prevents:'Kanker serviks dan penyakit lain akibat infeksi Human Papillomavirus.', ages:'Anak perempuan usia 9 tahun (BIAS kelas V–VI), 2 dosis dengan jarak 6–12 bulan.' },
+      { name:'Td/Tdap', prevents:'Tetanus dan difteri; Tdap juga melindungi dari pertusis.', ages:'Usia 10 tahun melalui BIAS SD kelas 2 dan 5; booster Td setiap 10 tahun.' }
+    ];
+
+    var PLACES = ['Posyandu','Puskesmas','RS','Klinik','Dokter anak','Bidan','Lainnya'];
+    var STORAGE_KEY = 'imunisasiku.v1';
+    var AVATAR_COLORS = ['#EC4899','#0284C7','#16A34A','#D97706','#7C3AED','#DB2777','#0891B2','#EA580C'];
+
+    /* ================= STATE ================= */
+    var state = loadState();
+    var activeTab = 'jadwal';
+    var activeFilter = 'semua';
+    var sheetItemId = null;
+
+    function loadState(){
+      try {
+        var raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+          var parsed = JSON.parse(raw);
+          if (parsed && Array.isArray(parsed.children)) return normalizeState(parsed);
+        }
+      } catch (e) { /* data rusak → mulai bersih */ }
+      return { children: [], activeChildId: null };
+    }
+    function normalizeState(s){
+      s.children = s.children.filter(function(c){ return c && c.id && c.name && c.dob; }).map(function(c){
+        return {
+          id: String(c.id), name: String(c.name), dob: String(c.dob),
+          gender: c.gender === 'M' ? 'M' : 'F',
+          records: (c.records && typeof c.records === 'object') ? c.records : {},
+          fluMarks: Array.isArray(c.fluMarks) ? c.fluMarks.filter(function(d){ return typeof d === 'string'; }) : []
+        };
+      });
+      if (!s.children.some(function(c){ return c.id === s.activeChildId; })) {
+        s.activeChildId = s.children.length ? s.children[0].id : null;
+      }
+      return s;
+    }
+    function saveState(){
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) { showToast('Penyimpanan perangkat penuh — data terakhir mungkin tidak tersimpan.'); }
+    }
+    function activeChild(){
+      for (var i = 0; i < state.children.length; i++) if (state.children[i].id === state.activeChildId) return state.children[i];
+      return state.children[0] || null;
+    }
+    function uid(){ return 'c' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
+
+    /* ================= TANGGAL ================= */
+    var DAY = 86400000;
+    function parseDate(str){ var p = String(str).split('-'); return new Date(+p[0], +p[1] - 1, +p[2]); }
+    function toISODate(d){ var m = d.getMonth() + 1, day = d.getDate(); return d.getFullYear() + '-' + (m < 10 ? '0' : '') + m + '-' + (day < 10 ? '0' : '') + day; }
+    function todayStart(){ var n = new Date(); return new Date(n.getFullYear(), n.getMonth(), n.getDate()); }
+    function todayISO(){ return toISODate(new Date()); }
+    function addDays(d, n){ return new Date(d.getFullYear(), d.getMonth(), d.getDate() + n); }
+    function diffDays(a, b){ return Math.round((a.getTime() - b.getTime()) / DAY); }
+    var fmtID = new Intl.DateTimeFormat('id-ID', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+    var fmtShort = new Intl.DateTimeFormat('id-ID', { day:'numeric', month:'short', year:'numeric' });
+    function fmtDate(d){ return fmtID.format(d); }
+    function fmtDateShort(d){ return fmtShort.format(d); }
+    function esc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(ch){ return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[ch]; }); }
+    function ageText(dobStr){
+      var dob = parseDate(dobStr), now = todayStart();
+      var months = (now.getFullYear() - dob.getFullYear()) * 12 + (now.getMonth() - dob.getMonth());
+      if (now.getDate() < dob.getDate()) months--;
+      if (months < 0) months = 0;
+      var years = Math.floor(months / 12), rem = months % 12;
+      if (years >= 1) return years + ' tahun' + (rem ? ' ' + rem + ' bulan' : '');
+      if (months >= 1) {
+        var anchor = new Date(dob.getFullYear(), dob.getMonth() + months, dob.getDate());
+        var days = diffDays(now, anchor);
+        return months + ' bulan' + (days > 0 ? ' ' + days + ' hari' : '');
+      }
+      var d = diffDays(now, dob);
+      return d + ' hari';
+    }
+
+    /* ================= LOGIKA JADWAL ================= */
+    function visibleSchedule(child){
+      return SCHEDULE.filter(function(it){ return !(it.femaleOnly && child.gender === 'M'); });
+    }
+    function itemStatus(child, item){
+      var rec = child.records[item.id];
+      if (rec) return { key:'done', label:'Sudah', due: addDays(parseDate(child.dob), item.offset), record: rec };
+      var due = addDays(parseDate(child.dob), item.offset);
+      var d = diffDays(due, todayStart());
+      if (d < 0) return { key:'overdue', label:'Terlewat', due: due, days: d };
+      if (d <= 14) return { key:'soon', label:'Segera', due: due, days: d };
+      return { key:'upcoming', label:'Mendatang', due: due, days: d };
+    }
+    function fluDue(child){
+      var dob = parseDate(child.dob), now = todayStart();
+      var due = addDays(dob, 180);
+      var marks = (child.fluMarks || []).slice().sort();
+      if (marks.length) {
+        var last = parseDate(marks[marks.length - 1]);
+        due = addDays(last, 365);
+      } else {
+        while (diffDays(due, now) < 0) due = addDays(due, 365);
+      }
+      return due;
+    }
+    function fluStatus(child){
+      var due = fluDue(child);
+      var marks = (child.fluMarks || []).slice().sort();
+      var lastMark = marks.length ? marks[marks.length - 1] : null;
+      var d = diffDays(due, todayStart());
+      var key = d < 0 ? 'overdue' : (d <= 14 ? 'soon' : 'upcoming');
+      return { due: due, days: d, key: key, lastMark: lastMark };
+    }
+    function nextVaccine(child){
+      var best = null;
+      visibleSchedule(child).forEach(function(it){
+        var st = itemStatus(child, it);
+        if (st.key === 'done') return;
+        if (!best || st.due < best.due) best = { item: it, due: st.due, key: st.key, days: st.days, flu: false };
+      });
+      var fs = fluStatus(child);
+      if (!best || fs.due < best.due) {
+        var fluItem = { name:'Influenza', dose:'Tahunan', prevents:'Influenza (flu musiman)' };
+        if (!best || fs.due <= best.due) best = { item: fluItem, due: fs.due, key: fs.key, days: fs.days, flu: true };
+      }
+      return best;
+    }
+    function progress(child){
+      var dueCount = 0, doneCount = 0;
+      visibleSchedule(child).forEach(function(it){
+        if (!it.program) return;
+        var st = itemStatus(child, it);
+        if (st.due <= todayStart()) { dueCount++; if (st.key === 'done') doneCount++; }
+      });
+      return { done: doneCount, total: dueCount, pct: dueCount ? Math.round(doneCount / dueCount * 100) : 100 };
+    }
+    function countdownText(days){
+      if (days < 0) return 'Terlewat ' + Math.abs(days) + ' hari';
+      if (days === 0) return 'Jatuh tempo hari ini';
+      if (days === 1) return 'Besok — 1 hari lagi';
+      return days + ' hari lagi';
+    }
+
+    /* ================= IKON ================= */
+    function icoSyringe(){ return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m18 2 4 4"/><path d="m17 7 3-3"/><path d="M19 9 8.7 19.3c-1 1-2.5 1-3.4 0l-.6-.6c-1-1-1-2.5 0-3.4L15 5"/><path d="m9 11 4 4"/><path d="m5 19-3 3"/><path d="m14 4 6-6"/></svg>'; }
+    function icoCheck(){ return '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>'; }
+    function icoShield(){ return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg>'; }
+    function icoCalendar(){ return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/></svg>'; }
+    function icoPin(){ return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg>'; }
+    function icoNote(){ return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>'; }
+    function statusPill(st){
+      if (st.key === 'done') return '<span class="status-pill done">' + icoCheck() + ' Sudah</span>';
+      if (st.key === 'overdue') return '<span class="status-pill overdue">Terlewat</span>';
+      if (st.key === 'soon') return '<span class="status-pill soon">Segera</span>';
+      return '<span class="status-pill upcoming">Mendatang</span>';
+    }
+    function tagsHTML(it){
+      var t = '';
+      if (it.program) t += '<span class="tag program">Program</span>';
+      if (it.bias) t += '<span class="tag bias">BIAS</span>';
+      if (it.endemis) t += '<span class="tag endemis">Daerah endemis</span>';
+      if (it.femaleOnly) t += '<span class="tag female">Khusus anak perempuan</span>';
+      return t ? '<div class="vax-tags">' + t + '</div>' : '';
+    }
+    function avatarColor(child){
+      var h = 0; for (var i = 0; i < child.id.length; i++) h = (h * 31 + child.id.charCodeAt(i)) >>> 0;
+      return AVATAR_COLORS[h % AVATAR_COLORS.length];
+    }
+
+    /* ================= RENDER ================= */
+    var $ = function(id){ return document.getElementById(id); };
+
+    function render(){
+      renderChildRow();
+      var child = activeChild();
+      var has = !!child;
+      $('viewOnboard').classList.toggle('hidden', has);
+      $('viewJadwal').classList.toggle('hidden', !has || activeTab !== 'jadwal');
+      $('viewLibrary').classList.toggle('hidden', activeTab !== 'library');
+      $('viewKartu').classList.toggle('hidden', !has || activeTab !== 'kartu');
+      document.querySelectorAll('.nav-btn').forEach(function(b){
+        b.classList.toggle('active', b.getAttribute('data-tab') === activeTab);
+      });
+      if (has) {
+        if (activeTab === 'jadwal') { renderDashboard(child); renderTimeline(child); }
+        if (activeTab === 'kartu') renderKartu(child);
+      }
+      renderLibrary($('libSearch').value || '');
+    }
+
+    function renderChildRow(){
+      var row = $('childRow');
+      var html = state.children.map(function(c){
+        var col = avatarColor(c);
+        return '<button type="button" class="chip-child' + (c.id === state.activeChildId ? ' active' : '') + '" data-child="' + esc(c.id) + '" role="tab" aria-selected="' + (c.id === state.activeChildId) + '">' +
+          '<span class="avatar" style="background:' + col + '">' + esc(c.name.trim().charAt(0).toUpperCase() || '?') + '</span>' + esc(c.name) + '</button>';
+      }).join('');
+      if (state.children.length) {
+        html += '<button type="button" class="chip-add" id="btnAddChild">' +
+          '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg> Tambah Anak</button>';
+      }
+      row.innerHTML = html;
+      row.querySelectorAll('[data-child]').forEach(function(b){
+        b.addEventListener('click', function(){
+          state.activeChildId = b.getAttribute('data-child');
+          saveState(); render();
+        });
+      });
+      var add = $('btnAddChild');
+      if (add) add.addEventListener('click', openAddChildSheet);
+    }
+
+    function renderDashboard(child){
+      var area = $('dashArea');
+      var nx = nextVaccine(child);
+      var prog = progress(child);
+      var counts = { done:0, soon:0, overdue:0 };
+      visibleSchedule(child).forEach(function(it){
+        var st = itemStatus(child, it);
+        if (st.key === 'done') counts.done++; else if (st.key === 'soon') counts.soon++; else if (st.key === 'overdue') counts.overdue++;
+      });
+      var C = 2 * Math.PI * 44;
+      var offset = C * (1 - prog.pct / 100);
+      var nextHTML;
+      if (nx) {
+        var cdClass = nx.key === 'overdue' ? ' overdue' : (nx.key === 'soon' ? ' soon' : '');
+        nextHTML =
+          '<div class="clay next-card">' +
+            '<div class="next-label">Vaksin Berikutnya</div>' +
+            '<div class="next-name">' + esc(nx.item.name) + ' — ' + esc(nx.item.dose) + '</div>' +
+            '<div class="next-due">Jatuh tempo: ' + fmtDate(nx.due) + '</div>' +
+            '<div><span class="countdown' + cdClass + '">' + countdownText(nx.days) + '</span></div>' +
+            '<button type="button" class="btn btn-pink" id="btnNextMark">' +
+              '<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>' +
+              (nx.flu ? 'Tandai Sudah Tahun Ini' : 'Tandai Sudah') + '</button>' +
+          '</div>';
+      } else {
+        nextHTML = '<div class="clay next-card"><div class="next-label">Vaksin Berikutnya</div>' +
+          '<div class="next-name">Semua jadwal sudah lengkap</div>' +
+          '<div class="next-due">Luar biasa! Seluruh imunisasi terjadwal untuk ' + esc(child.name) + ' sudah tercatat.</div></div>';
+      }
+      area.innerHTML =
+        '<div class="clay child-meta">' +
+          '<div class="avatar-big" style="background:' + avatarColor(child) + '">' + esc(child.name.trim().charAt(0).toUpperCase() || '?') + '</div>' +
+          '<div><div class="nm">' + esc(child.name) + '</div>' +
+          '<div class="age">' + (child.gender === 'F' ? 'Perempuan' : 'Laki-laki') + ' · Lahir ' + fmtDateShort(parseDate(child.dob)) + ' · Usia ' + ageText(child.dob) + '</div></div>' +
+        '</div>' +
+        '<div style="margin-top:14px;">' + nextHTML + '</div>' +
+        '<div class="dash-grid">' +
+          '<div class="clay ring-card">' +
+            '<div class="ring-wrap">' +
+              '<svg width="104" height="104" viewBox="0 0 104 104">' +
+                '<circle class="ring-bg" cx="52" cy="52" r="44" fill="none" stroke-width="11"/>' +
+                '<circle class="ring-fg" cx="52" cy="52" r="44" fill="none" stroke-width="11" stroke-linecap="round" stroke-dasharray="' + C.toFixed(1) + '" stroke-dashoffset="' + offset.toFixed(1) + '"/>' +
+              '</svg>' +
+              '<div class="ring-center"><div class="ring-pct">' + prog.pct + '%</div><div class="ring-of">' + prog.done + ' dari ' + prog.total + '</div></div>' +
+            '</div>' +
+            '<div><div class="ring-title">Imunisasi Dasar Lengkap</div>' +
+            '<div class="ring-note">Vaksin program yang sudah jatuh tempo dan sudah diberikan.</div></div>' +
+          '</div>' +
+          '<div class="clay stats-card">' +
+            '<div style="font-family:\'Varela Round\',sans-serif; font-size:17px;">Ringkasan Jadwal</div>' +
+            '<div class="stat-row">' +
+              '<span class="stat-chip"><span class="dot green"></span> Selesai: ' + counts.done + '</span>' +
+              '<span class="stat-chip"><span class="dot amber"></span> Segera: ' + counts.soon + '</span>' +
+              '<span class="stat-chip"><span class="dot red"></span> Terlewat: ' + counts.overdue + '</span>' +
+            '</div>' +
+            '<div class="hint">Status dihitung otomatis dari tanggal lahir ' + esc(child.name) + ' dan catatan pemberian.</div>' +
+          '</div>' +
+        '</div>';
+      var bm = $('btnNextMark');
+      if (bm && nx) bm.addEventListener('click', function(){
+        if (nx.flu) markFluDone();
+        else openSheet(nx.item.id);
+      });
+    }
+
+    function renderFilters(counts){
+      var defs = [
+        { key:'semua', label:'Semua' },
+        { key:'berikutnya', label:'Berikutnya' },
+        { key:'terlewat', label:'Terlewat' },
+        { key:'selesai', label:'Selesai' }
+      ];
+      $('filterRow').innerHTML = defs.map(function(d){
+        return '<button type="button" class="fchip' + (activeFilter === d.key ? ' active' : '') + '" data-filter="' + d.key + '">' +
+          d.label + ' <span class="cnt">' + counts[d.key] + '</span></button>';
+      }).join('');
+      $('filterRow').querySelectorAll('[data-filter]').forEach(function(b){
+        b.addEventListener('click', function(){ activeFilter = b.getAttribute('data-filter'); render(); });
+      });
+    }
+
+    function renderTimeline(child){
+      var items = visibleSchedule(child).map(function(it){ return { item: it, st: itemStatus(child, it) }; });
+      var nx = nextVaccine(child);
+      var nextId = (nx && !nx.flu) ? nx.item.id : null;
+      var counts = {
+        semua: items.length,
+        berikutnya: items.filter(function(x){ return x.st.key !== 'done' && x.item.id === nextId || x.st.key === 'soon'; }).length,
+        terlewat: items.filter(function(x){ return x.st.key === 'overdue'; }).length,
+        selesai: items.filter(function(x){ return x.st.key === 'done'; }).length
+      };
+      renderFilters(counts);
+
+      /* Kartu khusus Influenza tahunan */
+      var fs = fluStatus(child);
+      var showFlu = (activeFilter === 'semua' || activeFilter === 'berikutnya');
+      var fluPill = fs.key === 'overdue' ? '<span class="status-pill overdue">Terlewat</span>'
+        : fs.key === 'soon' ? '<span class="status-pill soon">Segera</span>'
+        : '<span class="status-pill upcoming">Mendatang</span>';
+      $('fluArea').innerHTML = showFlu ?
+        '<div class="clay flu-card" style="margin-top:12px;">' +
+          '<div style="display:flex; gap:12px; align-items:flex-start;">' +
+            '<div class="vax-ico" style="background:var(--blue)">' + icoSyringe() + '</div>' +
+            '<div class="vax-main">' +
+              '<div class="vax-name">Influenza (tahunan)</div>' +
+              '<div class="vax-sub">Diulang setiap tahun sejak usia 6 bulan. Melindungi dari flu musiman dan komplikasinya.</div>' +
+              '<div class="vax-sub" style="margin-top:6px; font-weight:800; color:var(--ink)">Jatuh tempo berikutnya: ' + fmtDate(fs.due) + ' · ' + countdownText(fs.days) + '</div>' +
+              (fs.lastMark ? '<div class="vax-sub">Terakhir diberikan: ' + fmtDate(parseDate(fs.lastMark)) + '</div>' : '<div class="vax-sub">Belum pernah tercatat diberikan.</div>') +
+            '</div>' + fluPill +
+          '</div>' +
+          '<button type="button" class="btn btn-blue btn-block" id="btnFluMark" style="margin-top:13px;">Tandai Sudah Tahun Ini</button>' +
+        '</div>' : '';
+      var bf = $('btnFluMark');
+      if (bf) bf.addEventListener('click', markFluDone);
+
+      /* Kelompok tonggak usia */
+      var filtered = items.filter(function(x){
+        if (activeFilter === 'semua') return true;
+        if (activeFilter === 'selesai') return x.st.key === 'done';
+        if (activeFilter === 'terlewat') return x.st.key === 'overdue';
+        if (activeFilter === 'berikutnya') return (x.item.id === nextId && x.st.key !== 'done') || x.st.key === 'soon';
+        return true;
+      });
+      if (!filtered.length) {
+        $('timelineArea').innerHTML = '<div class="clay empty-box" style="margin-top:14px;">' +
+          (activeFilter === 'terlewat' ? 'Tidak ada vaksin yang terlewat. Kerja bagus!' :
+           activeFilter === 'selesai' ? 'Belum ada vaksin yang ditandai selesai. Buka detail vaksin untuk mencatat pemberiannya.' :
+           activeFilter === 'berikutnya' ? 'Tidak ada vaksin yang jatuh tempo dalam waktu dekat.' :
+           'Tidak ada jadwal untuk ditampilkan.') + '</div>';
+        return;
+      }
+      var html = '';
+      GROUP_ORDER.forEach(function(g){
+        var groupItems = filtered.filter(function(x){ return x.item.group === g; });
+        if (!groupItems.length) return;
+        html += '<div class="group-title"><span class="g-badge">Usia ' + esc(g) + '</span><span class="g-line"></span></div>';
+        html += '<div class="vax-list">' + groupItems.map(function(x){
+          var col = x.st.key === 'done' ? 'var(--green)' : x.st.key === 'overdue' ? 'var(--red)' : x.st.key === 'soon' ? 'var(--amber)' : 'var(--blue)';
+          var sub = x.st.key === 'done'
+            ? 'Diberikan ' + fmtDateShort(parseDate(x.st.record.date)) + (x.st.record.place ? ' · ' + esc(x.st.record.place) : '')
+            : 'Jatuh tempo ' + fmtDateShort(x.st.due) + ' · ' + countdownText(x.st.days);
+          return '<button type="button" class="clay vax-card" data-vax="' + x.item.id + '">' +
+            '<span class="vax-ico" style="background:' + col + '">' + icoSyringe() + '</span>' +
+            '<span class="vax-main"><span class="vax-name">' + esc(x.item.name) + ' — ' + esc(x.item.dose) + '</span>' +
+            '<span class="vax-sub" style="display:block">' + sub + '</span>' + tagsHTML(x.item) + '</span>' +
+            statusPill(x.st) + '</button>';
+        }).join('') + '</div>';
+      });
+      $('timelineArea').innerHTML = html;
+      $('timelineArea').querySelectorAll('[data-vax]').forEach(function(b){
+        b.addEventListener('click', function(){ openSheet(b.getAttribute('data-vax')); });
+      });
+    }
+
+    function renderLibrary(query){
+      var q = (query || '').trim().toLowerCase();
+      var list = LIBRARY.filter(function(v){
+        return !q || v.name.toLowerCase().indexOf(q) >= 0 || v.prevents.toLowerCase().indexOf(q) >= 0;
+      });
+      $('libList').innerHTML = list.length ? list.map(function(v){
+        return '<div class="clay lib-card">' +
+          '<div style="display:flex; gap:12px; align-items:flex-start;">' +
+            '<div class="vax-ico" style="background:var(--pink)">' + icoShield() + '</div>' +
+            '<div class="vax-main"><div class="lib-name">' + esc(v.name) + '</div>' +
+            '<div class="lib-prevent">' + esc(v.prevents) + '</div>' +
+            '<div class="lib-age">' + icoCalendar() + '<span>' + esc(v.ages) + '</span></div></div>' +
+          '</div></div>';
+      }).join('') : '<div class="clay empty-box">Tidak ditemukan vaksin yang cocok dengan “' + esc(query) + '”. Coba kata kunci lain.</div>';
+    }
+
+    function summaryRows(child){
+      var rows = visibleSchedule(child).map(function(it){
+        var st = itemStatus(child, it);
+        return { item: it, st: st };
+      });
+      var fs = fluStatus(child);
+      return { rows: rows, flu: fs };
+    }
+
+    function renderKartu(child){
+      var s = summaryRows(child);
+      var prog = progress(child);
+      var rowsHTML = s.rows.map(function(r){
+        var right = r.st.key === 'done'
+          ? '<span class="done-txt">Sudah · ' + fmtDateShort(parseDate(r.st.record.date)) + '</span>'
+          : '<span class="notyet-txt">Belum · jatuh tempo ' + fmtDateShort(r.st.due) + '</span>';
+        return '<tr><td><strong>' + esc(r.item.name) + '</strong> — ' + esc(r.item.dose) + '</td><td>' + right + '</td></tr>';
+      }).join('');
+      var fluRow = '<tr><td><strong>Influenza</strong> — Tahunan</td><td>' +
+        (s.flu.lastMark ? '<span class="done-txt">Terakhir ' + fmtDateShort(parseDate(s.flu.lastMark)) + '</span><br><span class="notyet-txt">Berikutnya ' + fmtDateShort(s.flu.due) + '</span>'
+                        : '<span class="notyet-txt">Belum · jatuh tempo ' + fmtDateShort(s.flu.due) + '</span>') + '</td></tr>';
+      $('kartuArea').innerHTML =
+        '<div class="clay kartu-head">' +
+          '<div style="display:flex; gap:12px; align-items:center;">' +
+            '<div class="avatar-big" style="width:52px;height:52px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-family:\'Varela Round\',sans-serif;font-size:24px;color:#fff;border:3px solid var(--line);background:' + avatarColor(child) + '">' + esc(child.name.trim().charAt(0).toUpperCase() || '?') + '</div>' +
+            '<div><div style="font-family:\'Varela Round\',sans-serif; font-size:20px; line-height:1.15;">' + esc(child.name) + '</div>' +
+            '<div class="hint">' + (child.gender === 'F' ? 'Perempuan' : 'Laki-laki') + ' · Lahir ' + fmtDate(parseDate(child.dob)) + ' · Usia ' + ageText(child.dob) + '</div></div>' +
+          '</div>' +
+          '<div class="stat-row" style="margin-top:14px;">' +
+            '<span class="stat-chip"><span class="dot pink"></span> Imunisasi dasar: ' + prog.pct + '% (' + prog.done + ' dari ' + prog.total + ')</span>' +
+          '</div>' +
+          '<div style="overflow-x:auto; margin-top:8px;"><table class="kartu-table">' +
+            '<thead><tr><th>Vaksin</th><th>Status</th></tr></thead><tbody>' + rowsHTML + fluRow + '</tbody></table></div>' +
+          '<div class="action-grid">' +
+            '<button type="button" class="btn btn-pink" id="btnPrint">Cetak Kartu</button>' +
+            '<button type="button" class="btn btn-blue" id="btnCopy">Salin Ringkasan</button>' +
+          '</div>' +
+        '</div>';
+      $('btnPrint').addEventListener('click', function(){ buildPrintArea(child); window.print(); });
+      $('btnCopy').addEventListener('click', function(){ copySummary(child); });
+
+      /* Isi area cetak */
+      buildPrintArea(child);
+    }
+
+    function buildPrintArea(child){
+      var s = summaryRows(child);
+      var rows = s.rows.map(function(r){
+        return '<tr><td>' + esc(r.item.name) + ' — ' + esc(r.item.dose) + '</td><td>' + fmtDateShort(r.st.due) + '</td><td>' +
+          (r.st.key === 'done' ? 'Sudah, ' + fmtDateShort(parseDate(r.st.record.date)) + (r.st.record.place ? ' di ' + esc(r.st.record.place) : '') : 'Belum') + '</td></tr>';
+      }).join('');
+      rows += '<tr><td>Influenza — Tahunan</td><td>' + fmtDateShort(s.flu.due) + '</td><td>' +
+        (s.flu.lastMark ? 'Terakhir diberikan ' + fmtDateShort(parseDate(s.flu.lastMark)) : 'Belum') + '</td></tr>';
+      $('printArea').innerHTML =
+        '<h1>Kartu Imunisasi — ' + esc(child.name) + '</h1>' +
+        '<div class="meta">' + (child.gender === 'F' ? 'Perempuan' : 'Laki-laki') + ' · Tanggal lahir: ' + fmtDate(parseDate(child.dob)) + ' · Usia: ' + ageText(child.dob) + '<br>Dicetak dari IMUNISASIKU! pada ' + fmtDate(new Date()) + '</div>' +
+        '<table><thead><tr><th>Vaksin</th><th>Jatuh Tempo</th><th>Status / Pemberian</th></tr></thead><tbody>' + rows + '</tbody></table>' +
+        '<p class="foot">Jadwal mengikuti rekomendasi IDAI 2024 sebagai panduan umum. Keputusan akhir tetap mengikuti dokter anak / petugas kesehatan.</p>';
+    }
+
+    function summaryText(child){
+      var s = summaryRows(child);
+      var lines = [];
+      lines.push('KARTU IMUNISASI — ' + child.name);
+      lines.push((child.gender === 'F' ? 'Perempuan' : 'Laki-laki') + ' · Lahir ' + fmtDate(parseDate(child.dob)) + ' · Usia ' + ageText(child.dob));
+      lines.push('');
+      lines.push('SUDAH DIBERIKAN:');
+      var doneLines = s.rows.filter(function(r){ return r.st.key === 'done'; }).map(function(r){
+        return '- ' + r.item.name + ' (' + r.item.dose + ') — ' + fmtDate(parseDate(r.st.record.date)) + (r.st.record.place ? ' di ' + r.st.record.place : '');
+      });
+      lines = lines.concat(doneLines.length ? doneLines : ['- Belum ada']);
+      lines.push('');
+      lines.push('BELUM DIBERIKAN:');
+      var todoLines = s.rows.filter(function(r){ return r.st.key !== 'done'; }).map(function(r){
+        return '- ' + r.item.name + ' (' + r.item.dose + ') — jatuh tempo ' + fmtDate(r.st.due);
+      });
+      todoLines.push('- Influenza (tahunan) — jatuh tempo berikutnya ' + fmtDate(s.flu.due) + (s.flu.lastMark ? ', terakhir diberikan ' + fmtDate(parseDate(s.flu.lastMark)) : ''));
+      lines = lines.concat(todoLines);
+      lines.push('');
+      lines.push('Jadwal mengikuti rekomendasi IDAI 2024 sebagai panduan umum.');
+      return lines.join('\n');
+    }
+    function copySummary(child){
+      var text = summaryText(child);
+      function ok(){ showToast('Ringkasan imunisasi ' + child.name + ' tersalin ke clipboard.'); }
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(ok, function(){ fallbackCopy(text); ok(); });
+      } else { fallbackCopy(text); ok(); }
+    }
+    function fallbackCopy(text){
+      var ta = document.createElement('textarea');
+      ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.select();
+      try { document.execCommand('copy'); } catch (e) {}
+      document.body.removeChild(ta);
+    }
+
+    /* ================= SHEET DETAIL VAKSIN ================= */
+    function openSheet(itemId){
+      var child = activeChild(); if (!child) return;
+      var item = null;
+      for (var i = 0; i < SCHEDULE.length; i++) if (SCHEDULE[i].id === itemId) item = SCHEDULE[i];
+      if (!item) return;
+      sheetItemId = itemId;
+      var st = itemStatus(child, item);
+      var rec = st.record;
+      var detailRows =
+        '<div class="detail-row">' + icoShield() + '<span><strong>Mencegah:</strong> ' + esc(item.prevents) + '</span></div>' +
+        '<div class="detail-row">' + icoCalendar() + '<span><strong>Jatuh tempo:</strong> ' + fmtDate(st.due) + ' (usia ' + esc(item.group) + ') — ' + countdownText(st.days || diffDays(st.due, todayStart())) + '</span></div>' +
+        (item.note ? '<div class="detail-row">' + icoNote() + '<span><strong>Catatan IDAI:</strong> ' + esc(item.note) + '</span></div>' : '');
+      var body;
+      if (rec) {
+        body =
+          '<div class="given-box">' +
+            '<div style="font-family:\'Varela Round\',sans-serif; font-size:17px; color:var(--green-dark)">Sudah diberikan</div>' +
+            '<div class="detail-row">' + icoCalendar() + '<span>' + fmtDate(parseDate(rec.date)) + '</span></div>' +
+            (rec.place ? '<div class="detail-row">' + icoPin() + '<span>' + esc(rec.place) + '</span></div>' : '') +
+            (rec.note ? '<div class="detail-row">' + icoNote() + '<span>' + esc(rec.note) + '</span></div>' : '') +
+          '</div>' +
+          '<button type="button" class="btn btn-danger btn-block" id="btnUnmark" style="margin-top:16px;">Batalkan Tanda</button>';
+      } else {
+        body =
+          '<form id="markForm" novalidate style="margin-top:16px;">' +
+            '<div class="field" id="fGivenDate"><label for="givenDate">Tanggal pemberian</label>' +
+              '<input type="date" id="givenDate" value="' + todayISO() + '" max="' + todayISO() + '" required />' +
+              '<div class="err">Tanggal pemberian tidak boleh di masa depan.</div></div>' +
+            '<div class="field"><label for="givenPlace">Tempat pemberian</label>' +
+              '<select id="givenPlace">' + PLACES.map(function(p){ return '<option value="' + esc(p) + '">' + esc(p) + '</option>'; }).join('') + '</select></div>' +
+            '<div class="field"><label for="givenNote">Catatan (opsional)</label>' +
+              '<input type="text" id="givenNote" placeholder="Mis. nomor batch, reaksi setelah vaksin…" maxlength="200" /></div>' +
+            '<button type="submit" class="btn btn-green btn-block">Tandai Sudah Diberikan</button>' +
+          '</form>';
+      }
+      $('sheetContent').innerHTML =
+        '<h2 id="sheetTitle">' + esc(item.name) + ' — ' + esc(item.dose) + '</h2>' +
+        '<div style="margin:6px 0 4px;">' + statusPill(st) + '</div>' +
+        tagsHTML(item) + detailRows + body;
+      $('sheetOverlay').classList.add('open');
+      var un = $('btnUnmark');
+      if (un) un.addEventListener('click', function(){
+        delete child.records[itemId];
+        saveState(); closeSheet(); render();
+        showToast('Tanda pemberian ' + item.name + ' untuk ' + child.name + ' dibatalkan.');
+      });
+      var mf = $('markForm');
+      if (mf) mf.addEventListener('submit', function(ev){
+        ev.preventDefault();
+        var dateVal = $('givenDate').value;
+        var wrap = $('fGivenDate');
+        if (!dateVal || dateVal > todayISO()) { wrap.classList.add('invalid'); $('givenDate').focus(); return; }
+        wrap.classList.remove('invalid');
+        child.records[itemId] = { date: dateVal, place: $('givenPlace').value, note: $('givenNote').value.trim() };
+        saveState(); closeSheet(); render();
+        celebrate(child.name, item.prevents);
+      });
+    }
+    function closeSheet(){ $('sheetOverlay').classList.remove('open'); sheetItemId = null; }
+    $('sheetClose').addEventListener('click', closeSheet);
+    $('sheetOverlay').addEventListener('click', function(e){ if (e.target === this) closeSheet(); });
+
+    /* ================= FORM ANAK ================= */
+    function childFormHTML(prefix){
+      return '' +
+      '<div class="field" id="' + prefix + 'NameWrap"><label for="' + prefix + 'Name">Nama anak</label>' +
+        '<input type="text" id="' + prefix + 'Name" placeholder="Mis. Nadia" maxlength="60" autocomplete="off" />' +
+        '<div class="err">Nama anak wajib diisi.</div></div>' +
+      '<div class="field" id="' + prefix + 'DobWrap"><label for="' + prefix + 'Dob">Tanggal lahir</label>' +
+        '<input type="date" id="' + prefix + 'Dob" max="' + todayISO() + '" />' +
+        '<div class="err" id="' + prefix + 'DobErr">Tanggal lahir wajib diisi dan tidak boleh di masa depan.</div></div>' +
+      '<div class="field" id="' + prefix + 'GenderWrap"><label>Jenis kelamin</label>' +
+        '<div class="gender-row">' +
+          '<label class="gender-opt"><input type="radio" name="' + prefix + 'Gender" value="F" /><span class="g-face">Perempuan</span></label>' +
+          '<label class="gender-opt"><input type="radio" name="' + prefix + 'Gender" value="M" /><span class="g-face">Laki-laki</span></label>' +
+        '</div><div class="err">Jenis kelamin wajib dipilih.</div></div>' +
+      '<button type="submit" class="btn btn-pink btn-block">Simpan &amp; Buat Jadwal</button>';
+    }
+    function wireChildForm(form, prefix, onDone){
+      form.innerHTML = childFormHTML(prefix);
+      form.addEventListener('submit', function(ev){
+        ev.preventDefault();
+        var name = $(prefix + 'Name').value.trim();
+        var dob = $(prefix + 'Dob').value;
+        var genderEl = form.querySelector('input[name="' + prefix + 'Gender"]:checked');
+        var ok = true;
+        var nw = $(prefix + 'NameWrap'), dw = $(prefix + 'DobWrap'), gw = $(prefix + 'GenderWrap');
+        nw.classList.toggle('invalid', !name); if (!name) ok = false;
+        var dobInvalid = !dob || dob > todayISO();
+        dw.classList.toggle('invalid', dobInvalid);
+        if (dobInvalid) {
+          $(prefix + 'DobErr').textContent = dob && dob > todayISO()
+            ? 'Tanggal lahir tidak boleh di masa depan. Periksa kembali tanggalnya, ya.'
+            : 'Tanggal lahir wajib diisi.';
+          ok = false;
+        }
+        gw.classList.toggle('invalid', !genderEl); if (!genderEl) ok = false;
+        if (!ok) return;
+        var child = { id: uid(), name: name, dob: dob, gender: genderEl.value, records: {}, fluMarks: [] };
+        state.children.push(child);
+        state.activeChildId = child.id;
+        saveState();
+        onDone(child);
+      });
+    }
+    function openAddChildSheet(){
+      sheetItemId = null;
+      $('sheetContent').innerHTML =
+        '<h2 id="sheetTitle">Tambah Anak</h2>' +
+        '<p class="hint" style="margin:0 0 14px;">Jadwal imunisasi akan dihitung otomatis dari tanggal lahir anak.</p>' +
+        '<form id="addChildForm" novalidate></form>';
+      $('sheetOverlay').classList.add('open');
+      wireChildForm($('addChildForm'), 'ac', function(child){
+        closeSheet(); activeFilter = 'semua'; render();
+        showToast('Profil ' + child.name + ' dibuat. Jadwal imunisasinya sudah tersusun!');
+      });
+    }
+
+    /* ================= AKSI ================= */
+    function markFluDone(){
+      var child = activeChild(); if (!child) return;
+      var t = todayISO();
+      if (child.fluMarks.indexOf(t) < 0) child.fluMarks.push(t);
+      saveState(); render();
+      celebrate(child.name, 'influenza (flu musiman)');
+    }
+    function celebrate(childName, prevents){
+      showToast('Hebat! ' + childName + ' sudah terlindungi dari ' + prevents + '.');
+      confetti();
+    }
+
+    var toastTimer = null;
+    function showToast(msg){
+      var t = $('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      if (toastTimer) clearTimeout(toastTimer);
+      toastTimer = setTimeout(function(){ t.classList.remove('show'); }, 4200);
+    }
+
+    var reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    function confetti(){
+      if (reducedMotion) return;
+      var box = $('confetti');
+      var colors = ['#EC4899','#0284C7','#16A34A','#D97706','#F9A8D4','#7DD3FC'];
+      for (var i = 0; i < 42; i++) {
+        var el = document.createElement('span');
+        el.className = 'confetto';
+        var size = 7 + Math.random() * 8;
+        el.style.left = (Math.random() * 100) + 'vw';
+        el.style.width = size + 'px';
+        el.style.height = (Math.random() > 0.5 ? size : size * 0.45) + 'px';
+        el.style.background = colors[i % colors.length];
+        el.style.borderRadius = Math.random() > 0.5 ? '50%' : '3px';
+        el.style.animationDuration = (1.6 + Math.random() * 1.4) + 's';
+        el.style.animationDelay = (Math.random() * 0.35) + 's';
+        box.appendChild(el);
+        (function(node){ setTimeout(function(){ if (node.parentNode) node.parentNode.removeChild(node); }, 3600); })(el);
+      }
+    }
+
+    /* Modal konfirmasi */
+    var modalCb = null;
+    function confirmModal(title, desc, okLabel, cb){
+      $('modalTitle').textContent = title;
+      $('modalDesc').textContent = desc;
+      $('modalOk').textContent = okLabel;
+      modalCb = cb;
+      $('modalOverlay').classList.add('open');
+    }
+    $('modalCancel').addEventListener('click', function(){ $('modalOverlay').classList.remove('open'); modalCb = null; });
+    $('modalOverlay').addEventListener('click', function(e){ if (e.target === this) { this.classList.remove('open'); modalCb = null; } });
+    $('modalOk').addEventListener('click', function(){
+      $('modalOverlay').classList.remove('open');
+      if (modalCb) { var cb = modalCb; modalCb = null; cb(); }
+    });
+
+    /* Navigasi tab */
+    document.querySelectorAll('.nav-btn').forEach(function(b){
+      b.addEventListener('click', function(){
+        var tab = b.getAttribute('data-tab');
+        if ((tab === 'jadwal' || tab === 'kartu') && !activeChild()) {
+          showToast('Tambahkan profil anak dulu untuk melihat ' + (tab === 'jadwal' ? 'jadwal' : 'kartu') + ' imunisasi.');
+          if (!state.children.length) { activeTab = 'jadwal'; render(); return; }
+        }
+        activeTab = tab;
+        render();
+        window.scrollTo({ top: 0, behavior: reducedMotion ? 'auto' : 'smooth' });
+      });
+    });
+
+    $('libSearch').addEventListener('input', function(){ renderLibrary(this.value); });
+
+    /* Kartu: ekspor / impor / hapus */
+    $('btnExport').addEventListener('click', function(){
+      var payload = JSON.stringify({ app:'imunisasiku', version:1, exportedAt:new Date().toISOString(), data: state }, null, 2);
+      var blob = new Blob([payload], { type:'application/json' });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url; a.download = 'imunisasiku-backup.json';
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      setTimeout(function(){ URL.revokeObjectURL(url); }, 2000);
+      showToast('Berkas cadangan JSON berhasil diunduh.');
+    });
+    $('btnImport').addEventListener('click', function(){ $('importFile').click(); });
+    $('importFile').addEventListener('change', function(){
+      var file = this.files && this.files[0];
+      this.value = '';
+      if (!file) return;
+      var reader = new FileReader();
+      reader.onload = function(){
+        try {
+          var parsed = JSON.parse(String(reader.result));
+          var data = parsed && parsed.data ? parsed.data : parsed;
+          if (!data || !Array.isArray(data.children)) throw new Error('format');
+          var cleaned = normalizeState({ children: data.children, activeChildId: data.activeChildId });
+          confirmModal('Impor Data?', 'Data saat ini (' + state.children.length + ' anak) akan diganti dengan data dari berkas (' + cleaned.children.length + ' anak). Lanjutkan?', 'Ya, Impor', function(){
+            state = cleaned; activeFilter = 'semua'; activeTab = 'jadwal';
+            saveState(); render();
+            showToast('Data berhasil dipulihkan dari berkas cadangan.');
+          });
+        } catch (e) {
+          showToast('Berkas tidak valid. Pastikan berkas adalah hasil Ekspor JSON dari IMUNISASIKU!.');
+        }
+      };
+      reader.onerror = function(){ showToast('Berkas tidak dapat dibaca. Coba lagi.'); };
+      reader.readAsText(file);
+    });
+    $('btnDeleteChild').addEventListener('click', function(){
+      var child = activeChild(); if (!child) return;
+      confirmModal('Hapus Profil Anak?', 'Profil dan seluruh catatan imunisasi ' + child.name + ' akan dihapus permanen dari perangkat ini.', 'Ya, Hapus', function(){
+        state.children = state.children.filter(function(c){ return c.id !== child.id; });
+        state.activeChildId = state.children.length ? state.children[0].id : null;
+        activeTab = 'jadwal'; activeFilter = 'semua';
+        saveState(); render();
+        showToast('Profil ' + child.name + ' telah dihapus.');
+      });
+    });
+    $('btnDeleteAll').addEventListener('click', function(){
+      confirmModal('Hapus Semua Data?', 'Seluruh profil anak dan catatan imunisasi di perangkat ini akan dihapus permanen. Tindakan ini tidak dapat dibatalkan.', 'Ya, Hapus Semua', function(){
+        state = { children: [], activeChildId: null };
+        activeTab = 'jadwal'; activeFilter = 'semua';
+        saveState(); render();
+        showToast('Semua data telah dihapus.');
+      });
+    });
+
+    /* Escape menutup sheet/modal */
+    document.addEventListener('keydown', function(e){
+      if (e.key === 'Escape') { closeSheet(); $('modalOverlay').classList.remove('open'); modalCb = null; }
+    });
+
+    /* ================= INIT ================= */
+    wireChildForm($('onboardForm'), 'ob', function(child){
+      activeFilter = 'semua'; activeTab = 'jadwal'; render();
+      showToast('Halo, ' + child.name + '! Jadwal imunisasimu sudah siap.');
+      confetti();
+    });
+    render();
+    </script>
+  </body>
+</html>
